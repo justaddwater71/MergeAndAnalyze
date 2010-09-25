@@ -1,0 +1,1 @@
+This package megers results from n-cross validation files (by default ending in a digit) with the "truth" labels in the original prediction files.  After the merge, the merged results are used to build a confusion matrix and report basic attributes of the source files.
