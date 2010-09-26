@@ -13,7 +13,7 @@ import java.util.StringTokenizer;
 
 import java.util.Iterator;
 
-public class Merger 
+public abstract class Merger 
 {
 	//Data Members
 	
@@ -40,23 +40,26 @@ public class Merger
 	}
 	
 	/**
-	 * ...
+	 * merges the leading labels of an infile with the lines of a result file.  this creates a merged file
+	 * of truth/label pairs to be used in machine learning effectiveness.  The distinction between
+	 * inFile and outFile is important: infile expects a label at the front of a line of data.  outFile
+	 * expects only a label.  If these two files are reversed, the merged file will not be usable.
 	 * Although the nature of building a List of files from File.List creates an ordered list of Files,
 	 * this method does NOT assume that files in inFileList and files in outFileList are in the same
 	 * order.  As such, files are iterated over in inFileList and are searched for in outFileList.  If a 
 	 * matching file is not found, then an error statement is written into the merge file.
 	 * This function depends on prediction files and result files having the same filename
 	 * but not the same file path.
+	 * 
 	 * @param inFileList list of files used to generate results (ie libSVM formatted prediction slice files).
 	 * @param outFileList list of files generated (result files from machine learning that match prediction slice files)
 	 * @param mergeFile outputted file of merged inFiles and outFiles
 	 * @throws FileNotFoundException if one of the inFiles or outFIles does not exist
 	 * @throws IOException thrown if a permissions or directory issue prevents accessing a file
 	 */
-	public static void mergeInAndOutLists(List<File> inFileList, List<File> outFileList, File mergeFile) throws FileNotFoundException, IOException
+	public static void mergeInAndOutLists(List<File> inFileList, File outFileDirectory, File mergeFile) throws FileNotFoundException, IOException
 	{
 		Iterator<File> inFileListIterator = inFileList.iterator();
-		HashMap<String, File> outFileNameMap = loadFileNameMap(outFileList);
 		File inFile;
 		File outFile;
 		PrintWriter mergePrintWriter = new PrintWriter(mergeFile);
@@ -64,16 +67,15 @@ public class Merger
 		while (inFileListIterator.hasNext())
 		{
 			inFile = inFileListIterator.next();
+			outFile = new File(outFileDirectory, inFile.getName());
 			
-			if (outFileNameMap.containsKey(inFile.getName()))
+			if (outFile.isFile())
 			{
-				outFile = outFileNameMap.get(inFile.getName());
-				
 				mergeInAndOut(inFile, outFile, mergePrintWriter);
 			}
 			else
 			{
-				mergePrintWriter.println("MATCHING FILE ERROR: " + inFile.getName() + " has no match found in outFile directory!");
+				mergePrintWriter.println("MATCHING FILE ERROR: " + inFile.getName() + " has no match found in outFile directory, " + outFileDirectory + "!");
 			}
 		}
 		
@@ -81,7 +83,16 @@ public class Merger
 	}
 	
 	/**
-	 * ...
+	 * 	Merges the leading labels of an infile with the lines of a result file.  this creates a merged file
+	 * of truth/label pairs to be used in machine learning effectiveness. The distinction between
+	 * inFile and outFile is important: infile expects a label at the front of a line of data.  outFile
+	 * expects only a label.  If these two files are reversed, the merged file will not be usable.
+	 * Although the nature of building a List of files from File.List creates an ordered list of Files,
+	 * this method does NOT assume that files in inFileList and files in outFileList are in the same
+	 * order.  As such, files are iterated over in inFileList and are searched for in outFileList.  If a 
+	 * matching file is not found, then an error statement is written into the merge file.
+	 * This function depends on prediction files and result files having the same filename
+	 * but not the same file path.
 	 * Since this variant of mergeInAndOut is provided with a PrintWriter from an outside calling
 	 * method, this variant does not close the PrintWriter.
 	 * @param inFile
@@ -116,9 +127,18 @@ public class Merger
 		outBufferedReader.close();
 		mergePrintWriter.flush();
 	}
-	
+
 	/**
-	 * .......
+	 * Merges the leading labels of an infile with the lines of a result file.  this creates a merged file
+	 * of truth/label pairs to be used in machine learning effectiveness. The distinction between
+	 * inFile and outFile is important: infile expects a label at the front of a line of data.  outFile
+	 * expects only a label.  If these two files are reversed, the merged file will not be usable.
+	 * Although the nature of building a List of files from File.List creates an ordered list of Files,
+	 * this method does NOT assume that files in inFileList and files in outFileList are in the same
+	 * order.  As such, files are iterated over in inFileList and are searched for in outFileList.  If a 
+	 * matching file is not found, then an error statement is written into the merge file.
+	 * This function depends on prediction files and result files having the same filename
+	 * but not the same file path.
 	 * This variant of mergeInAndOut creates and closes its own PrintWriter from the provided mergeFile.
 	 * @param inFile
 	 * @param outFile
