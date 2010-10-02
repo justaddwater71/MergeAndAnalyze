@@ -19,9 +19,9 @@ import java.util.Vector;
 public class MergeAndAnalyze 
 {
 	//Data Members
-	public static final String 	SUFFIX_DELIM 			= ".";
-	public static final String MERGE_DIR_NAME 	= "mergeFiles";
-	public static final String RESULTS_DIR_NAME = "results";
+	public static final String 	SUFFIX_DELIM 			= "\\.";
+	public static final String MERGE_DIR_NAME 	= "merge";
+	public static final String RESULTS_DIR_NAME = "result";
 	public static final String PREDICT_DIR_NAME 	= "predict";
 	
 	//Constructors
@@ -67,7 +67,7 @@ public class MergeAndAnalyze
 			
 			if (listSuffix.equals(currentFileSuffix))
 			{
-				//Do nothing
+				//FIXME Do nothing is not a good long term block of code, use ! in IF for permanent soluton
 			}
 			else
 			{
@@ -89,7 +89,7 @@ public class MergeAndAnalyze
 	
 	public static void makeMergeAndAnalysisFiles (File mergeDirectory, File resultsDirectory, File predictDirectory) throws FileNotFoundException, IOException
 	{
-		mergeDirectory.mkdirs();
+		//mergeDirectory.mkdirs();
 		
 		List<List<File>> predictLists = buildCrossValidationLists(predictDirectory);
 		
@@ -97,6 +97,7 @@ public class MergeAndAnalyze
 		File				currentFile;
 		String			currentFileSuffix;
 		File				mergeFile;
+		//PrintWriter mergePrintWriter;
 		
 		Iterator<List<File>> listsIterator = predictLists.iterator();
 		Iterator<File> fileIterator;
@@ -120,11 +121,22 @@ public class MergeAndAnalyze
 				fileSize += fileIterator.next().length();
 			}
 			
+			try
+			{
+				mergeFile.createNewFile();
+			}
+			catch(IOException i)
+			{
+				mergeFile.getParentFile().mkdirs();
+				mergeFile.createNewFile();
+			}
+			
 			Merger.mergeInAndOutLists(currentList, resultsDirectory, mergeFile);
 			Analyzer.analyzeLists(mergeFile, fileSize);
 		}
 	}
 	
+	//FIXME this needs a filter option to go after only a single file basename
 	public static void makeMergeAndAnalysisFiles (File parentDirectory) throws FileNotFoundException, IOException
 	{
 		File mergeDirectory		= new File(parentDirectory, MERGE_DIR_NAME);

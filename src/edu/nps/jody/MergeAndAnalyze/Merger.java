@@ -10,13 +10,14 @@ import java.io.Reader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.Vector;
 
 import java.util.Iterator;
 
 public abstract class Merger 
 {
 	//Data Members
-	
+	final static String PAIR_DELIM = ":";
 	
 	//Constructors
 	
@@ -69,7 +70,7 @@ public abstract class Merger
 			inFile = inFileListIterator.next();
 			outFile = new File(outFileDirectory, inFile.getName());
 			
-			if (outFile.isFile())
+			if (outFile.isFile())//FIXME This is better handled with an exception
 			{
 				mergeInAndOut(inFile, outFile, mergePrintWriter);
 			}
@@ -119,9 +120,9 @@ public abstract class Merger
 			inTokenizer = new StringTokenizer(inString);
 			inString = inTokenizer.nextToken();
 			outString = outBufferedReader.readLine();
-			mergePrintWriter.println(inString + ":" + outString);
-			mergePrintWriter.flush();
+			mergePrintWriter.println(inString + PAIR_DELIM + outString);//FIXME Replace with PAIR_DELIM
 		}
+		mergePrintWriter.flush();
 		
 		inBufferedReader.close();
 		outBufferedReader.close();
@@ -173,5 +174,38 @@ public abstract class Merger
 		outBufferedReader.close();
 		mergePrintWriter.flush();
 		mergePrintWriter.close();
+	}
+
+	public static long sumFileSizes(String baseFileName, int startExt, int endExt, File directory)
+	{
+		long size = 0;
+		File file;
+		
+		for (int i = startExt; i <= endExt; i++)
+		{
+			file = new File(directory, baseFileName + "." + i);
+			try
+			{
+				size += file.length();
+			}
+			catch (Exception e)
+			{
+				//Do nothing
+			}
+		}
+		
+		return size;
+	}
+	
+	public static void mergeInAndOut(String baseFileName, int startExt, int endExt, File inFileDirectory, File outFileDirectory, File mergeFile) throws FileNotFoundException, IOException
+	{
+		List<File> fileList = new Vector<File>();
+		
+		for (int i = startExt; i <= endExt; i++)
+		{
+			fileList.add(new File(inFileDirectory, baseFileName + "." + i));
+		}
+		
+		mergeInAndOutLists(fileList, outFileDirectory, mergeFile);
 	}
 }

@@ -29,7 +29,7 @@ public abstract class Analyzer
 {
 	//Data Members
 	public static final String PAIR_DELIM = ":";
-	public static final String ANALYSIS_DIR_NAME = "analysisFiles";
+	public static final String ANALYSIS_DIR_NAME = "analysis";
 	
 	//Constructors
 	
@@ -50,11 +50,17 @@ public abstract class Analyzer
 	{
 		HashMap<String, Integer> confusionMap = createConfusionMatrix(mergeFile);
 		
-		analysisDirectory.mkdirs();
-		
 		File analysisFile = new File(analysisDirectory, mergeFile.getName());
 		
+		try
+		{
 		analysisFile.createNewFile();
+		}
+		catch(IOException i)
+		{
+			analysisDirectory.mkdirs();
+			analysisFile.createNewFile();
+		}
 		
 		PrintWriter mergePrintWriter = new PrintWriter(analysisFile);
 		
@@ -63,7 +69,7 @@ public abstract class Analyzer
 	
 	public static void analyzeLists(File mergeFile, long size) throws FileNotFoundException, IOException
 	{
-		File analysisDirectory = new File(mergeFile.getParentFile(), ANALYSIS_DIR_NAME);
+		File analysisDirectory = new File(mergeFile.getParentFile().getParentFile(), ANALYSIS_DIR_NAME);
 		
 		analyzeLists(mergeFile, size, analysisDirectory);
 	}
@@ -142,6 +148,7 @@ public abstract class Analyzer
 		
 		//Finish off confusion matrix line
 		printWriter.println();
+		printWriter.flush();//Put here to stop the confusion matrix from just disapearing.
 		
 		printWriter.print("<authors> ");
 		iterator = authorSortedSet.iterator();
