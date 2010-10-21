@@ -159,10 +159,10 @@ public abstract class Analyzer
 		//Finish off author line
 		printWriter.println();
 		
-		printWriter.print("<truthUtterances>");
+		printWriter.print("<truthUtterances> ");
 		int totalCount = printMap(printWriter, truthHashMap);
 				
-		printWriter.print("<labelUtterances>");
+		printWriter.print("<labelUtterances> ");
 		printMap(printWriter, labelHashMap);
 		
 		printWriter.println("<totalUtteranes> " + totalCount);

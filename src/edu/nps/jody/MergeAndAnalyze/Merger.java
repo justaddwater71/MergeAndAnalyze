@@ -63,6 +63,17 @@ public abstract class Merger
 		Iterator<File> inFileListIterator = inFileList.iterator();
 		File inFile;
 		File outFile;
+		
+		try
+		{
+			mergeFile.createNewFile();
+		}
+		catch (IOException i)
+		{
+			mergeFile.getParentFile().mkdirs();
+			mergeFile.createNewFile();
+		}
+		
 		PrintWriter mergePrintWriter = new PrintWriter(mergeFile);
 		
 		while (inFileListIterator.hasNext())
@@ -148,12 +159,23 @@ public abstract class Merger
 	 * @throws IOException
 	 */
 	public static void mergeInAndOut(File inFile, File outFile, File mergeFile) throws FileNotFoundException, IOException
-	{
+	{		
 		Reader inReader = new FileReader(inFile);
 		Reader outReader = new FileReader(outFile);
 		
 		BufferedReader inBufferedReader = new BufferedReader(inReader);
 		BufferedReader outBufferedReader = new BufferedReader(outReader);
+		
+		try
+		{
+			mergeFile.createNewFile();
+		}
+		catch (IOException i)
+		{
+			mergeFile.getParentFile().mkdirs();
+			mergeFile.createNewFile();
+		}
+		
 		PrintWriter mergePrintWriter = new PrintWriter(mergeFile);
 		
 		StringTokenizer inTokenizer;
