@@ -29,7 +29,34 @@ public abstract class Analyzer
 {
 	//Data Members
 	public static final String PAIR_DELIM = ":";
-	public static final String ANALYSIS_DIR_NAME = "analysis";
+	public static final String ANALYSIS_DIR_NAME 			= "analysis";
+	private static final int FILE_PATH_PARAMS_COUNT 	= 7;
+	private static final int PATH_TAIL									= 2;
+	private static final int CROSSVAL_INDEX 					= 0;
+	private static final int GROUP_SIZE_INDEX 					= 1;
+	private static final int GROUP_TYPE_INDEX 				= 2;
+	private static final int METHOD_INDEX 						= 3;
+	private static final int MODEL_INDEX 							= 4;
+	private static final int FEATURE_TYPE_INDEX 			= 5;
+	private static final int CORPUS_INDEX 						= 6;
+	
+	private static final String FILENAME_TAG						= "<mergeFileName>";
+	private static final String FILENAME_AND_PATH_TAG	= "<mergeFileNameAndPath>";
+	private static final String DATA_SIZE_TAG					= "<originalDataSize>";
+	private static final String FILE_DATE_STAMP_TAG		= "<mergeFileDateStamp>";
+	private static final String FILE_DATE_TAG					= "<mergeFileDate>";
+	private static final String CORPUS_TAG						= "<corpus>";
+	private static final String FEATURE_TYPE_TAG			= "<featureType>";
+	private static final String MODEL_TAG							= "<model>";
+	private static final String METHOD_TAG						= "<method>";
+	private static final String GROUP_TYPE_TAG				= "<groupType>";
+	private static final String GROUP_SIZE_TAG					= "<groupSize>";
+	private static final String CROSSVAL_TAG					= "<crossval>";
+	private static final String CONFUSION_MATRIX_TAG	= "<confusionMatrix>";
+	private static final String AUTHOR_TAG						= "<authors>";
+	private static final String TRUTH_TAG							= "<truthUtterances>";
+	private static final String LABEL_TAG							= "<labelUtterances>";
+	private static final String TOTAL_TAG							= "<totalUtterances>";
 	
 	//Constructors
 	
@@ -102,17 +129,29 @@ public abstract class Analyzer
 		String truth;
 		String label;
 		
-		printWriter.println("<mergeFileName> " + mergeFile.getName());
-		printWriter.println("<mergeFileNameAndPath> "	+ mergeFile.getAbsolutePath());
-		printWriter.println("<originalDataSize> " 	+ size);
-		printWriter.println("<mergeFileDateStamp> " 	+ mergeFile.lastModified());
+		printWriter.println(FILENAME_TAG							+ " " + mergeFile.getName());
+		printWriter.println(FILENAME_AND_PATH_TAG 	+ " " + mergeFile.getAbsolutePath());
+		printWriter.println(DATA_SIZE_TAG 						+ " " + size);
+		printWriter.println(FILE_DATE_STAMP_TAG 			+ " " + mergeFile.lastModified());
 
 		Date date = new Date(mergeFile.lastModified());
 		
-		printWriter.println("<mergeFileDate> " +  date.toString());
+		printWriter.println(FILE_DATE_TAG 						+ " " +  date.toString());
 		
+		String[] resultCharacteristics = analyzeFilePath(mergeFile.getAbsolutePath());
 		
-		printWriter.print("<confusionMatrix> ");
+		//This is a lot of typing for clarity sake.  A loop could pull this off with enumators, but
+		//that might be hard to read later.
+		
+		printWriter.println(CORPUS_TAG 							+ " " + resultCharacteristics[CORPUS_INDEX]);
+		printWriter.println(FEATURE_TYPE_TAG 				+ " " + resultCharacteristics[FEATURE_TYPE_INDEX]);
+		printWriter.println(MODEL_TAG 								+ " " + resultCharacteristics[MODEL_INDEX]);
+		printWriter.println(METHOD_TAG 							+ " " + resultCharacteristics[METHOD_INDEX]);
+		printWriter.println(GROUP_TYPE_TAG 					+ " " + resultCharacteristics[GROUP_TYPE_INDEX]);
+		printWriter.println(GROUP_SIZE_TAG 					+ " " + resultCharacteristics[GROUP_SIZE_INDEX]);
+		printWriter.println(CROSSVAL_TAG 						+ " " + resultCharacteristics[CROSSVAL_INDEX]);
+		
+		printWriter.print(CONFUSION_MATRIX_TAG 			+ " ");
 		
 		//FIXME This is a confused, long method.  Need to really rethink from scratch.
 		while (iterator.hasNext())
@@ -150,7 +189,7 @@ public abstract class Analyzer
 		printWriter.println();
 		printWriter.flush();//Put here to stop the confusion matrix from just disapearing.
 		
-		printWriter.print("<authors> ");
+		printWriter.print(AUTHOR_TAG	+ " ");
 		iterator = authorSortedSet.iterator();
 		while (iterator.hasNext())
 		{
@@ -159,13 +198,13 @@ public abstract class Analyzer
 		//Finish off author line
 		printWriter.println();
 		
-		printWriter.print("<truthUtterances> ");
+		printWriter.print(TRUTH_TAG 		+ " ");
 		int totalCount = printMap(printWriter, truthHashMap);
 				
-		printWriter.print("<labelUtterances> ");
+		printWriter.print(LABEL_TAG 		+ " ");
 		printMap(printWriter, labelHashMap);
 		
-		printWriter.println("<totalUtteranes> " + totalCount);
+		printWriter.println(TOTAL_TAG	+ " " + totalCount);
 		
 		printWriter.flush();
 	}
@@ -280,5 +319,21 @@ public abstract class Analyzer
 		mergeBufferedReader.close();
 		
 		return confusionMap;
+	}
+	
+	public static String[] analyzeFilePath(String filePath)
+	{
+		String[] result		= new String[FILE_PATH_PARAMS_COUNT];
+		String[] splitPath = filePath.split("/");
+		
+		int length = splitPath.length;
+		int resultIndex = 0;
+		
+		for (int i = length - PATH_TAIL; i > length - PATH_TAIL - FILE_PATH_PARAMS_COUNT; i--)
+		{
+			result[resultIndex] = splitPath[i];
+		}
+		
+		return result;
 	}
 }
